@@ -97,7 +97,7 @@ Un sistem de irigatie programabil , care detecteaza umiditatea solului si pornes
 
 
 # Imagini
+[go]([http://stackoverflow.com](https://imgur.com/a/cAm6Y9G)){:target="_blank"}
 
-*https://imgur.com/a/cAm6Y9G*
 
 

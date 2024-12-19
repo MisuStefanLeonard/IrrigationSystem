@@ -54,7 +54,8 @@ Un sistem de irigatie programabil , care detecteaza umiditatea solului si pornes
 
 ###### - Cantitatea de apa sa fie aleasa (cat sa curga)
 
-#### - In functie de umiditatea solului care este masurata de senzorul de umiditate , pompa de apa va fi actionata prin intermediul WI-FI-ului (sau automat cand senzorul detecteaza ), trimitandu-i o comanda care sa porneasca sau sa opreasca apa. Un rezervor de apa va fi atasat langa recipientul de pamant , de unde furtunul va trage apa spre pamant. Un ### ecran OLED / LCD va afisa starea curenta de functionare.
+#### - In functie de umiditatea solului care este masurata de senzorul de umiditate , pompa de apa va fi actionata prin intermediul WI-FI-ului (sau automat cand senzorul detecteaza ), trimitandu-i o comanda care sa porneasca sau sa opreasca apa. 
+#### - Un rezervor de apa va fi atasat langa recipientul de pamant , de unde furtunul va trage apa spre pamant. Un ### ecran OLED / LCD va afisa starea curenta de functionare.
 
 # Probleme intampinate
 

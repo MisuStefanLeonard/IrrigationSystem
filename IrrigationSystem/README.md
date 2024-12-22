@@ -96,3 +96,10 @@ Un sistem de irigatie programabil , care detecteaza umiditatea solului si pornes
 #### Modul coborator tensiune - (OUT) -> GND ESP8266
 
 
+# Code snips
+
+```cpp
+
+```
+
+

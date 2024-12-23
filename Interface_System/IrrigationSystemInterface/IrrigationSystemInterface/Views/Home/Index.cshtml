@@ -1,0 +1,228 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    var humidity = ViewData["Humidity"] ?? "Not Available";
+    var mode = ViewData["Mode"] ?? "Not available";
+    var forceStop = ViewData["ForceStop"] ?? "Not available";
+    var pumpState = ViewData["PumpState"] ?? "Not available";
+    var wasSet = ViewData["SETARE"] ?? "Not available";
+    var canceled = ViewData["Anulata"] ?? "Not available";
+    var connected = ViewData["CON"] ?? "Not connected";
+    var threshold = ViewData["ThreshHold"] ?? "Not available";
+
+}
+
+<div class="text-center">
+    
+    @if (connected.ToString() == "CON")
+    {
+        <div id="connAlertt" class="alert alert-warning text-center" role="alert">
+            Conectat!
+        </div>
+    }
+    @if (wasSet.ToString() == "SETAT")
+    {
+        <div id="setAlert" class="alert alert-warning text-center" role="alert">
+            <span id="textSetAlarm"></span>
+        </div>
+    }
+    @if (wasSet.ToString() == "BLANK")
+    {
+        <div id="cancelTime" class="alert alert-warning text-center" role="alert">
+            
+        </div>
+    }
+    <h1 class="display-4 my-2">Irrigation System</h1>
+
+    <h5 class="my-2">Umiditate sol : @humidity%</h5>
+    <div class="alert alert-success text-center">
+        <button type="button" name="command" class="btn btn-primary">MOD SELECTAT : @mode</button>
+    </div>
+    
+    <h5 class="my-2">Stare pompa : <button type="button" class="btn btn-primary">@pumpState</button></h5>
+
+    @if (forceStop.ToString() == "FORCESTOP")
+    {
+        <div id="carefulAlert" class="alert alert-warning text-center my-2" role="alert">
+            Butonul de oprire fortata a fost activat!;
+        </div>
+    }
+
+
+    <!-- Pump Control Section -->
+    <form method="post" action="/Home/SendCommand" class="my-2">
+        <div class="my-3">SELECTEAZA MOD</div>
+        <button type="submit" name="command" value="m_SELECT" class="btn btn-success m-1">MOD MANUAL</button>
+        <button type="submit" name="command" value="a_SELECT" class="btn btn-danger m-1">MOD AUTO</button>
+        @if (mode.ToString() == "MANUAL")
+        {
+            <br/>
+            <button type="submit" name="command" value="START" class="btn btn-success my-2">START POMPA</button>
+            <button type="submit" name="command" value="STOP" class="btn btn-danger my-2">STOP POMPA</button>
+        }
+        @if (mode.ToString() == "AUTO")
+        {
+            <br/>
+            <div class="my-3">
+                <label class="form-label mt-2">Setează umiditatea solului (0%-99%):</label>
+                <input type="number" id="thresholdInput" value="@threshold" name="threshold" min="0" max="99" class="form-control w-25 d-inline-block" required/>
+                <input type="hidden" id="formattedThreshold" name="command"/>
+                <button type="submit" class="btn btn-primary ms-2" onclick="prepareThreshold()">Setează</button>
+            </div>
+            
+        }
+    </form>
+
+    @if (mode.ToString() == "MANUAL")
+    {
+        @if (wasSet.ToString() == "SETAT")
+        {
+            <div id="successAlert" class="alert alert-success" role="alert">
+                Setat cu succes!
+            </div>
+
+            <div id="carefulAlert" class="alert alert-warning text-center" role="alert">
+                <form method="post" action="/Home/SendCommand">
+                    <button type="submit" name="command" value="CANCEL" class="btn btn-warning">ANULEAZA</button>
+                </form>
+            </div>
+        }
+
+        @if (canceled.ToString() == "PROGRAMARE_ANULATA")
+        {
+            <div id="canceledSucces" class="alert alert-success" role="alert">
+                Anulata cu success!
+            </div>
+        }
+
+        <h3 class="display-6 mt-4">Progrmeaza udarea</h3>
+        <form method="post" action="/Home/SendCommand" onsubmit="return formatProgramCommand()">
+            <div class="d-flex justify-content-center">
+                <!-- Hour Selection -->
+                <label class="form-label mt-2">ORE:</label>
+                <select id="hour" class="form-select mx-1" required>
+                    @for (var h = 0; h < 24; h++)
+                    {
+                        <option value="@h">@h</option>
+                    }
+                </select>
+
+                <!-- Minute Selection -->
+                <label class="form-label mt-2">MINUTE:</label>
+                <select id="minute" class="form-select mx-1" required>
+                    @for (var m = 0; m < 60; m++)
+                    {
+                        <option value="@m">@m</option>
+                    }
+                </select>
+
+                <!-- Second Selection -->
+                <label class="form-label mt-2">SECUNDE:</label>
+                <select id="second" class="form-select mx-1" required>
+                    @for (var s = 0; s < 60; s++)
+                    {
+                        <option value="@s">@s</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Hidden Input to Hold the Final Command -->
+            <input type="hidden" id="programCommand" name="command"/>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary mt-3">Seteaza</button>
+
+
+        </form>
+    }
+
+    <script>
+       
+        function formatProgramCommand() {
+            const hour = document.getElementById("hour").value;
+            const minute = document.getElementById("minute").value;
+            const second = document.getElementById("second").value;
+
+            // Set the formatted command in the hidden input
+            document.getElementById("programCommand").value = `PROGRAM_${hour}:${minute}:${second}`;
+
+            const now = new Date();
+
+            // Add the user-provided time to the current date
+            now.setHours(now.getHours() + hour);
+            now.setMinutes(now.getMinutes() + minute);
+            now.setSeconds(now.getSeconds() + second);
+
+            // Extract HH:MM:SS
+            const hh = String(now.getHours()).padStart(2, '0'); // Ensure two digits
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            const formattedTime = `${hh}:${mm}:${ss}`;
+
+            // Save formatted time to local storage
+            localStorage.setItem("programmedTime", formattedTime);
+            
+            
+            return true; // Allow form submission
+        }
+        window.onload = function () {
+            const alertDiv = document.getElementById("successAlert");
+            if (alertDiv) {
+                setTimeout(() => {
+                    alertDiv.style.display = "none"; // Hide the alert
+                }, 3000); // 3000ms = 3 seconds
+            }
+        };
+
+        window.onload = function () {
+            const alertDiv = document.getElementById("canceledSucces");
+            if (alertDiv) {
+                setTimeout(() => {
+                    alertDiv.style.display = "none"; // Hide the alert
+                }, 3000); // 3000ms = 3 seconds
+            }
+        };
+        
+        function prepareThreshold() {
+            const thresholdValue = document.getElementById("thresholdInput").value;
+
+            // Format the value as required
+            const formattedValue = `${thresholdValue}_THRESHOLD`;
+
+            // Set the formatted value in the hidden input
+            document.getElementById("formattedThreshold").value = formattedValue;
+
+            console.log("Formatted Threshold Command:", formattedValue); // Debugging
+        }
+
+        // Function to disable mode switch buttons for a delay
+        document.addEventListener("DOMContentLoaded", () => {
+            const setAlertDiv = document.getElementById("setAlert");
+            const getText = document.getElementById("textSetAlarm");
+            if (setAlertDiv) {
+                // Retrieve a value from localStorage
+                const programmedTime = localStorage.getItem("programmedTime");
+                console.log(programmedTime)
+                // Set the content of the div
+                if (programmedTime) {
+                    getText.textContent = `Programmed Time: ${programmedTime}`;
+                } else {
+                    setAlertDiv.style = "display: none;";
+                }
+            }
+            const cancelAlertDiv = document.getElementById("cancelTime")
+            if (cancelAlertDiv){
+                const programmedTime = localStorage.getItem("programmedTime");
+                if (programmedTime !== undefined ){
+                    localStorage.setItem("programmedTime" , "");
+                }
+            }
+        });
+
+
+
+    
+    
+    
+    </script>
+</div>
+
